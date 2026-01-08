@@ -1,405 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-
-<!-- 🔒 Player Access Gate (client-side, saved on device) -->
+<!-- Player Access Gate (client-side, saved on device) -->
+<style id="gateLockStyle">html{visibility:hidden}</style>
 <script>
 (function () {
-  const STORAGE_KEY = "shaolin_playbook_access_granted_v2"; // bump this if you change password
+  const STORAGE_KEY = "shaolin_playbook_access_granted_v2"; // bump if you change password
   const PASSWORD = "SHAOLIN2026"; // <-- CHANGE THIS
   const MAX_TRIES = 3;
 
+  function deny(message) {
+    // Keep the page hidden, then show ONLY the deny message
+    document.documentElement.innerHTML =
+      "<head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>" +
+      "<title>Access Denied</title></head>" +
+      "<body style='margin:0;font-family:system-ui;background:#000;color:#fff;'>" +
+      "<div style='padding:24px;max-width:720px;margin:0 auto;'>" +
+      "<h2>" + message + "</h2>" +
+      "<p style='opacity:.75'>If you previously unlocked this device, use Reset Access or clear site data.</p>" +
+      "</div></body>";
+    // Make sure deny screen is visible
+    document.documentElement.style.visibility = "visible";
+    throw new Error(message);
+  }
+
   // Already unlocked on this device/browser
-  if (localStorage.getItem(STORAGE_KEY) === "1") return;
+  if (localStorage.getItem(STORAGE_KEY) === "1") {
+    const s = document.getElementById("gateLockStyle");
+    if (s) s.remove();
+    document.documentElement.style.visibility = "visible";
+    return;
+  }
 
   for (let i = 0; i < MAX_TRIES; i++) {
     const input = prompt("Enter Team Playbook Password:");
-    if (input === null) break;
+    if (input === null) return deny("Access cancelled"); // ✅ Cancel = NO access
 
-    // Normalize to prevent accidental spaces causing weird behavior
     if (input.trim() === PASSWORD) {
       localStorage.setItem(STORAGE_KEY, "1");
-      return;
+      const s = document.getElementById("gateLockStyle");
+      if (s) s.remove();
+      document.documentElement.style.visibility = "visible";
+      return; // ✅ Success = show page
     }
 
     alert("Incorrect password.");
   }
 
-  document.body.innerHTML =
-    "<div style='font-family:system-ui;padding:24px;max-width:720px;margin:0 auto;'>" +
-      "<h2>Access denied</h2>" +
-      "<p>You entered an incorrect password.</p>" +
-      "<p style='opacity:.75'>If you previously unlocked this device, use Reset Access or clear site data.</p>" +
-    "</div>";
-  throw new Error("Access denied");
+  deny("Access denied");
 })();
 </script>
 <!-- /Player Access Gate -->
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shaolin Hurricanes Offensive Playbook System</title>
-<meta name="theme-color" content="#FF6B35">
-
-<style>
-:root{
-  --primary:#FF6B35;
-  --bg:#000;
-  --panel:rgba(15,15,15,.75);
-  --text:#fff;
-  --muted:#9aa0a6;
-  --border:rgba(255,255,255,.08);
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-  background:
-    radial-gradient(800px 400px at 20% 0%, rgba(255,107,53,.25), transparent 60%),
-    radial-gradient(700px 400px at 90% 20%, rgba(0,217,255,.15), transparent 55%),
-    #000;
-  color:var(--text);
-}
-.wrap{
-  max-width:980px;
-  margin:0 auto;
-  padding:20px 16px 64px;
-}
-header{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 0 18px;
-  position:sticky;
-  top:0;
-  z-index:20;
-  background:linear-gradient(180deg, rgba(0,0,0,.92), rgba(0,0,0,0));
-  backdrop-filter: blur(6px);
-}
-.logo{
-  width:76px;
-  height:76px;
-  border-radius:22px;
-  overflow:hidden;
-  border:1px solid rgba(255,107,53,.35);
-  box-shadow:0 10px 26px rgba(0,0,0,.55);
-  background:rgba(255,255,255,.02);
-}
-.logo img{width:100%;height:100%;object-fit:cover}
-.hero{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:22px;
-  padding:26px 22px 28px;
-  box-shadow:0 30px 60px rgba(0,0,0,.6);
-}
-.tags{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:14px;
-}
-.tag{
-  padding:6px 12px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:700;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  border:1px solid rgba(255,107,53,.4);
-  color:#ffb08a;
-  background:rgba(255,107,53,.08);
-}
-h1{
-  font-size:clamp(28px,5vw,42px);
-  line-height:1.05;
-  margin:6px 0 12px;
-}
-p{
-  color:var(--muted);
-  line-height:1.6;
-  font-size:16px;
-  max-width:70ch;
-}
-.grid{
-  margin-top:18px;
-  display:grid;
-  grid-template-columns: 1fr;
-  gap:14px;
-}
-.card{
-  background:rgba(15,15,15,.65);
-  border:1px solid var(--border);
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 18px 46px rgba(0,0,0,.55);
-}
-.cardtop{
-  padding:18px 18px 16px;
-}
-.pill{
-  display:inline-flex;
-  align-items:center;
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:900;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  border:1px solid rgba(255,107,53,.35);
-  color:#ffb08a;
-  background:rgba(255,107,53,.08);
-}
-h2{
-  margin:10px 0 8px;
-  font-size:20px;
-  line-height:1.2;
-}
-.desc{margin:0 0 14px;}
-.cardactions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.btn{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  padding:12px 16px;
-  border-radius:14px;
-  background:linear-gradient(135deg,#FF6B35,#FF8A5C);
-  color:#000;
-  font-weight:900;
-  border:none;
-  cursor:pointer;
-  text-decoration:none;
-  box-shadow:0 12px 30px rgba(255,107,53,.45);
-}
-.btn.secondary{
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--border);
-  color:#fff;
-  box-shadow:none;
-}
-.cardpreview{
-  border-top:1px solid var(--border);
-  background:rgba(0,0,0,.45);
-}
-.previewbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  padding:12px 14px;
-  border-bottom:1px solid var(--border);
-}
-.smallnote{
-  color:#7b8086;
-  font-size:13px;
-  line-height:1.35;
-}
-.frame{
-  width:100%;
-  height:min(72vh, 820px);
-  border:0;
-  background:#000;
-  display:block;
-}
-@media (min-width:860px){
-  .grid{grid-template-columns: 1fr 1fr;}
-  .card[data-pdf-id="full"]{grid-column: 1 / -1;}
-}
-@media (max-width:520px){
-  .logo{width:68px;height:68px;border-radius:20px}
-  .frame{height:68vh}
-}
-footer{
-  margin-top:22px;
-  text-align:center;
-  color:#666;
-  font-size:13px;
-}
-a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
-
-.heroactions{
-  margin-top: 14px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-</style>
-</head>
-<body>
-<div class="wrap">
-
-<header>
-  <div class="logo" aria-label="Shaolin Hurricanes logo">
-    <img src="logo.png" alt="Shaolin Hurricanes Logo" onerror="this.style.display='none'">
-  </div>
-</header>
-
-<section class="hero">
-  <div class="tags">
-    <span class="tag">Fast Install</span>
-    <span class="tag">Game-Day Ready</span>
-    <span class="tag">Built for Tempo</span>
-  </div>
-
-  <h1>Shaolin Hurricanes<br>Offensive Playbook System</h1>
-
-  <p> INTERACTIVE PLAYBOOK IS BEING UPDATED. USE PDF LINKS. </p>
-  <p>Tap a playbook to open the PDF in a new tab, or use Preview to view it inline.</p>
-
-  <div class="heroactions" role="group" aria-label="Playbook actions">
-    <a class="btn" href="playbook.html">Open Interactive Playbook</a>
-    <button class="btn secondary" type="button" id="togglePdfs" aria-controls="pdfGrid" aria-expanded="true">Hide PDFs</button>
-
-    <!-- ✅ Added: Reset Access -->
-    <button class="btn secondary" type="button" id="resetAccessBtn">Reset Access</button>
-  </div>
-</section>
-
-<section class="grid" id="pdfGrid" aria-label="Playbook PDFs">
-
-  <article class="card" data-pdf-id="full" data-pdf-src="files/Shaolin_Hurricanes_Playbook_SIMPLIFIED.pdf">
-    <div class="cardtop">
-      <div class="pill">Master</div>
-      <h2>Full Offensive Playbook</h2>
-      <p class="desc">Complete system: formations, runs, passes, and install structure.</p>
-      <div class="cardactions">
-        <a class="btn" href="files/Shaolin_Hurricanes_Playbook_SIMPLIFIED.pdf" target="_blank" rel="noopener">▶ Open PDF</a>
-        <button class="btn secondary" type="button" data-action="toggle">Preview</button>
-      </div>
-    </div>
-    <div class="cardpreview" hidden>
-      <div class="previewbar">
-        <div class="smallnote">Inline preview (best on desktop/tablet). If it won’t load, use “Open PDF”.</div>
-        <button class="btn secondary" type="button" data-action="close">Close</button>
-      </div>
-      <iframe class="frame" title="Full Offensive Playbook Preview" loading="lazy"></iframe>
-    </div>
-  </article>
-
-  <article class="card" data-pdf-id="pass" data-pdf-src="files/Shaolin_Hurricanes_PASS_PLAYS_Playbook_SIMPLIFIED.pdf">
-    <div class="cardtop">
-      <div class="pill">Pass</div>
-      <h2>Pass Plays Playbook</h2>
-      <p class="desc">All pass concepts, protections in one PDF.</p>
-      <div class="cardactions">
-        <a class="btn" href="files/Shaolin_Hurricanes_PASS_PLAYS_Playbook_SIMPLIFIED.pdf" target="_blank" rel="noopener">▶ Open PDF</a>
-        <button class="btn secondary" type="button" data-action="toggle">Preview</button>
-      </div>
-    </div>
-    <div class="cardpreview" hidden>
-      <div class="previewbar">
-        <div class="smallnote">Inline preview (best on desktop/tablet). If it won’t load, use “Open PDF”.</div>
-        <button class="btn secondary" type="button" data-action="close">Close</button>
-      </div>
-      <iframe class="frame" title="Pass Plays Playbook (Simplified) preview" loading="lazy"></iframe>
-    </div>
-  </article>
-
-  <article class="card" data-pdf-id="run" data-pdf-src="files/Shaolin_Hurricanes_RUN_PLAYS_Playbook_SIMPLIFIED.pdf">
-    <div class="cardtop">
-      <div class="pill">Run</div>
-      <h2>Run Plays Playbook</h2>
-      <p class="desc">Run game + tags, organized for fast install and game-day calling.</p>
-      <div class="cardactions">
-        <a class="btn" href="files/Shaolin_Hurricanes_RUN_PLAYS_Playbook_SIMPLIFIED.pdf" target="_blank" rel="noopener">▶ Open PDF</a>
-        <button class="btn secondary" type="button" data-action="toggle">Preview</button>
-      </div>
-    </div>
-    <div class="cardpreview" hidden>
-      <div class="previewbar">
-        <div class="smallnote">Inline preview (best on desktop/tablet). If it won’t load, use “Open PDF”.</div>
-        <button class="btn secondary" type="button" data-action="close">Close</button>
-      </div>
-      <iframe class="frame" title="Run Plays Playbook (Simplified) preview" loading="lazy"></iframe>
-    </div>
-  </article>
-
-</section>
-
-<footer>
-  © 2026 Shaolin Hurricanes · Playbooks
-</footer>
-
-</div>
-
-<script>
-(() => {
-  const STORAGE_KEY = "shaolin_playbook_access_granted_v2";
-
-  // ✅ Reset Access button
-  const resetBtn = document.getElementById('resetAccessBtn');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      localStorage.removeItem(STORAGE_KEY);
-      alert("Saved access cleared on this device. Reloading…");
-      location.reload();
-    });
-  }
-
-  // Your existing preview logic
-  const cards = Array.from(document.querySelectorAll('.card'));
-
-  function closeCard(card) {
-    const panel = card.querySelector('.cardpreview');
-    const frame = card.querySelector('iframe');
-    if (!panel || !frame) return;
-    panel.hidden = true;
-    frame.removeAttribute('src');
-  }
-
-  function openCard(card) {
-    const src = card.getAttribute('data-pdf-src');
-    const panel = card.querySelector('.cardpreview');
-    const frame = card.querySelector('iframe');
-    if (!src || !panel || !frame) return;
-
-    cards.forEach(c => { if (c !== card) closeCard(c); });
-
-    panel.hidden = false;
-    if (!frame.getAttribute('src')) frame.setAttribute('src', src);
-    panel.scrollIntoView({behavior:'smooth', block:'start'});
-  }
-
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-action]');
-    if (!btn) return;
-
-    const card = e.target.closest('.card');
-    if (!card) return;
-
-    const action = btn.getAttribute('data-action');
-    if (action === 'toggle') {
-      const panel = card.querySelector('.cardpreview');
-      if (!panel) return;
-      if (panel.hidden) openCard(card);
-      else closeCard(card);
-    } else if (action === 'close') {
-      closeCard(card);
-    }
-  });
-
-  // Optional: PDF show/hide button (if you want it to actually work)
-  const toggle = document.getElementById('togglePdfs');
-  const grid = document.getElementById('pdfGrid');
-  if (toggle && grid) {
-    toggle.addEventListener('click', () => {
-      const isHidden = grid.hasAttribute('hidden');
-      if (isHidden) {
-        grid.removeAttribute('hidden');
-        toggle.textContent = "Hide PDFs";
-        toggle.setAttribute('aria-expanded', 'true');
-      } else {
-        grid.setAttribute('hidden', '');
-        toggle.textContent = "Show PDFs";
-        toggle.setAttribute('aria-expanded', 'false');
-      }
-    });
-  }
-})();
-</script>
-</body>
-</html>
