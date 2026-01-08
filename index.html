@@ -1,6 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+<!-- 🔒 Player Access Gate (client-side) -->
+<!-- NOTE: Change PASSWORD below to your team password. -->
+<script>
+(function () {
+  const STORAGE_KEY = "shaolin_playbook_access_granted_v1";
+  const PASSWORD = "SHAOLIN2026"; // <-- CHANGE THIS
+
+  // Already unlocked on this device/browser
+  if (localStorage.getItem(STORAGE_KEY) === "1") return;
+
+  // Prompt user for password
+  const input = prompt("Enter Team Playbook Password:");
+  if (input === null) {
+    document.body.innerHTML = "<h2 style='font-family:system-ui;padding:24px;'>Access cancelled.</h2>";
+    throw new Error("Access cancelled");
+  }
+
+  if (input !== PASSWORD) {
+    document.body.innerHTML = "<h2 style='font-family:system-ui;padding:24px;'>Access denied.</h2>";
+    throw new Error("Access denied");
+  }
+
+  // Save access for future visits on this device/browser
+  localStorage.setItem(STORAGE_KEY, "1");
+})();
+</script>
+<!-- /Player Access Gate -->
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shaolin Hurricanes Playbooks</title>
@@ -214,7 +244,7 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
 
   <p>
     Tap a playbook to open the PDF in a new tab, or use Preview to view it inline.
-    INTERACTIVE PLAYBOOK IS BEING UPDATED. USE PDF LINKS.
+    Put the PDFs in <strong>/files/</strong> at your repo root (same folder as this page).
   </p>
 
   <div class="heroactions" role="group" aria-label="Playbook actions">
@@ -250,7 +280,7 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
     <div class="cardtop">
       <div class="pill">Pass</div>
       <h2>Pass Plays Playbook</h2>
-      <p class="desc">All pass concepts, protections, in all one PDF.</p>
+      <p class="desc">All pass concepts, protections in one PDF.</p>
       <div class="cardactions">
         <a class="btn" href="files/Shaolin_Hurricanes_PASS_PLAYS_Playbook_SIMPLIFIED.pdf" target="_blank" rel="noopener">▶ Open PDF</a>
         <button class="btn secondary" type="button" data-action="toggle">Preview</button>
@@ -281,7 +311,7 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
         <div class="smallnote">Inline preview (best on desktop/tablet). If it won’t load, use “Open PDF”.</div>
         <button class="btn secondary" type="button" data-action="close">Close</button>
       </div>
-      <iframe class="frame" title="Run Plays Playbook preview" loading="lazy"></iframe>
+      <iframe class="frame" title="Run Plays Playbook (Simplified) preview" loading="lazy"></iframe>
     </div>
   </article>
 
