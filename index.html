@@ -2,34 +2,39 @@
 <html lang="en">
 <head>
 
-<!-- 🔒 Player Access Gate (client-side) -->
-<!-- NOTE: Change PASSWORD below to your team password. -->
+<!-- 🔒 Player Access Gate (client-side, saved on device) -->
 <script>
 (function () {
-  const STORAGE_KEY = "shaolin_playbook_access_granted_v1";
+  const STORAGE_KEY = "shaolin_playbook_access_granted_v2"; // bump this if you change password
   const PASSWORD = "SHAOLIN2026"; // <-- CHANGE THIS
+  const MAX_TRIES = 3;
 
   // Already unlocked on this device/browser
   if (localStorage.getItem(STORAGE_KEY) === "1") return;
 
-  // Prompt user for password
-  const input = prompt("Enter Team Playbook Password:");
-  if (input === null) {
-    document.body.innerHTML = "<h2 style='font-family:system-ui;padding:24px;'>Access cancelled.</h2>";
-    throw new Error("Access cancelled");
+  for (let i = 0; i < MAX_TRIES; i++) {
+    const input = prompt("Enter Team Playbook Password:");
+    if (input === null) break;
+
+    // Normalize to prevent accidental spaces causing weird behavior
+    if (input.trim() === PASSWORD) {
+      localStorage.setItem(STORAGE_KEY, "1");
+      return;
+    }
+
+    alert("Incorrect password.");
   }
 
-  if (input !== PASSWORD) {
-    document.body.innerHTML = "<h2 style='font-family:system-ui;padding:24px;'>Access denied.</h2>";
-    throw new Error("Access denied");
-  }
-
-  // Save access for future visits on this device/browser
-  localStorage.setItem(STORAGE_KEY, "1");
+  document.body.innerHTML =
+    "<div style='font-family:system-ui;padding:24px;max-width:720px;margin:0 auto;'>" +
+      "<h2>Access denied</h2>" +
+      "<p>You entered an incorrect password.</p>" +
+      "<p style='opacity:.75'>If you previously unlocked this device, use Reset Access or clear site data.</p>" +
+    "</div>";
+  throw new Error("Access denied");
 })();
 </script>
 <!-- /Player Access Gate -->
-
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -242,17 +247,16 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
 
   <h1>Shaolin Hurricanes<br>Offensive Playbook System</h1>
 
- 
-  <p> INTERACTIVE PLAYBOOK IS BEING UPDATED. USE PDF LINKS. <p>
-    
-    Tap a playbook to open the PDF in a new tab, or use Preview to view it inline.
-  </p>
+  <p> INTERACTIVE PLAYBOOK IS BEING UPDATED. USE PDF LINKS. </p>
+  <p>Tap a playbook to open the PDF in a new tab, or use Preview to view it inline.</p>
 
   <div class="heroactions" role="group" aria-label="Playbook actions">
     <a class="btn" href="playbook.html">Open Interactive Playbook</a>
     <button class="btn secondary" type="button" id="togglePdfs" aria-controls="pdfGrid" aria-expanded="true">Hide PDFs</button>
-  </div>
 
+    <!-- ✅ Added: Reset Access -->
+    <button class="btn secondary" type="button" id="resetAccessBtn">Reset Access</button>
+  </div>
 </section>
 
 <section class="grid" id="pdfGrid" aria-label="Playbook PDFs">
@@ -276,7 +280,6 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
     </div>
   </article>
 
-
   <article class="card" data-pdf-id="pass" data-pdf-src="files/Shaolin_Hurricanes_PASS_PLAYS_Playbook_SIMPLIFIED.pdf">
     <div class="cardtop">
       <div class="pill">Pass</div>
@@ -295,7 +298,6 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
       <iframe class="frame" title="Pass Plays Playbook (Simplified) preview" loading="lazy"></iframe>
     </div>
   </article>
-
 
   <article class="card" data-pdf-id="run" data-pdf-src="files/Shaolin_Hurricanes_RUN_PLAYS_Playbook_SIMPLIFIED.pdf">
     <div class="cardtop">
@@ -326,6 +328,19 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
 
 <script>
 (() => {
+  const STORAGE_KEY = "shaolin_playbook_access_granted_v2";
+
+  // ✅ Reset Access button
+  const resetBtn = document.getElementById('resetAccessBtn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      alert("Saved access cleared on this device. Reloading…");
+      location.reload();
+    });
+  }
+
+  // Your existing preview logic
   const cards = Array.from(document.querySelectorAll('.card'));
 
   function closeCard(card) {
@@ -333,7 +348,6 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
     const frame = card.querySelector('iframe');
     if (!panel || !frame) return;
     panel.hidden = true;
-    // Drop src to free memory on mobile
     frame.removeAttribute('src');
   }
 
@@ -343,7 +357,6 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
     const frame = card.querySelector('iframe');
     if (!src || !panel || !frame) return;
 
-    // Close others (keeps page light on phones)
     cards.forEach(c => { if (c !== card) closeCard(c); });
 
     panel.hidden = false;
@@ -368,6 +381,24 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
       closeCard(card);
     }
   });
+
+  // Optional: PDF show/hide button (if you want it to actually work)
+  const toggle = document.getElementById('togglePdfs');
+  const grid = document.getElementById('pdfGrid');
+  if (toggle && grid) {
+    toggle.addEventListener('click', () => {
+      const isHidden = grid.hasAttribute('hidden');
+      if (isHidden) {
+        grid.removeAttribute('hidden');
+        toggle.textContent = "Hide PDFs";
+        toggle.setAttribute('aria-expanded', 'true');
+      } else {
+        grid.setAttribute('hidden', '');
+        toggle.textContent = "Show PDFs";
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
 })();
 </script>
 </body>
