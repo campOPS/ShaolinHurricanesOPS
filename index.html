@@ -2,56 +2,58 @@
 <html lang="en">
 <head>
 
-<!-- 🔒 Player Access Gate (client-side, saved on device) -->
-<style id="gateLockStyle">html{visibility:hidden}</style>
+<!-- 🔒 HARD GATE (no storage, blocks render, logo-only deny page) -->
+<style>html{visibility:hidden}</style>
 <script>
 (function () {
-  const STORAGE_KEY = "shaolin_playbook_access_granted_v2"; // bump if you change password
   const PASSWORD = "SHAOLIN2026"; // <-- CHANGE THIS
   const MAX_TRIES = 3;
 
-  function deny(message) {
-    // Keep the page hidden, then show ONLY the deny message
-    document.documentElement.innerHTML =
-      "<head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>" +
-      "<title>Access Denied</title></head>" +
-      "<body style='margin:0;font-family:system-ui;background:#000;color:#fff;'>" +
-      "<div style='padding:24px;max-width:720px;margin:0 auto;'>" +
-      "<h2>" + message + "</h2>" +
-      "<p style='opacity:.75'>If you previously unlocked this device, use Reset Access or clear site data.</p>" +
-      "</div></body>";
-    // Make sure deny screen is visible
+  // ✅ Set your logo file path here (same logo you use on the page)
+  const LOGO_SRC = "logo.png";
+
+  function showDeny() {
+    // Replace EVERYTHING with a logo-only page (no links/buttons/text)
+    document.open();
+    document.write(`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Access Denied</title>
+  <style>
+    html,body{height:100%;margin:0;background:#000;}
+    .wrap{height:100%;display:flex;align-items:center;justify-content:center;}
+    img{max-width:min(92vw,700px);max-height:92vh;display:block;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <img src="${LOGO_SRC}" alt="Shaolin Hurricanes"/>
+  </div>
+</body>
+</html>`);
+    document.close();
+    // Ensure deny page is visible
     document.documentElement.style.visibility = "visible";
-    throw new Error(message);
+    throw new Error("Access denied");
   }
 
-  // Already unlocked on this device/browser
-  if (localStorage.getItem(STORAGE_KEY) === "1") {
-    const s = document.getElementById("gateLockStyle");
-    if (s) s.remove();
-    document.documentElement.style.visibility = "visible";
-    return;
-  }
-
+  // Prompt up to MAX_TRIES times
   for (let i = 0; i < MAX_TRIES; i++) {
     const input = prompt("Enter Team Playbook Password:");
-    if (input === null) return deny("Access cancelled"); // ✅ Cancel = NO access
-
-    if (input.trim() === PASSWORD) {
-      localStorage.setItem(STORAGE_KEY, "1");
-      const s = document.getElementById("gateLockStyle");
-      if (s) s.remove();
+    if (input === null) return showDeny();           // Cancel = deny
+    if (input.trim() === PASSWORD) {                 // Correct = allow
       document.documentElement.style.visibility = "visible";
-      return; // ✅ Success = show page
+      return;
     }
-
-    alert("Incorrect password.");
+    // wrong password; loop continues
   }
 
-  deny("Access denied");
+  return showDeny();
 })();
 </script>
-<!-- /Player Access Gate -->
+<!-- /HARD GATE -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
