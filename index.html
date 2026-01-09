@@ -203,24 +203,36 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
   z-index:999999;
 }
 #gateOverlay .gateBox{
-  width:min(92vw,520px);
+  width:min(92vw,560px);
   text-align:center;
   padding:18px;
 }
 #gateOverlay img{
   max-width:min(92vw,700px);
-  max-height:70vh;
+  max-height:52vh;
   display:block;
   margin:0 auto;
 }
+#gateOverlay .gateTitle{
+  margin:14px 0 6px;
+  font-weight:900;
+  letter-spacing:.02em;
+}
+#gateOverlay .gateHint{
+  margin:0 0 12px;
+  color:rgba(255,255,255,.70);
+  font-size:14px;
+  line-height:1.4;
+}
 #gateOverlay .gateForm{
-  margin-top:16px;
+  margin-top:8px;
   display:flex;
   gap:10px;
   justify-content:center;
   flex-wrap:wrap;
 }
-#gateOverlay input{
+#gateOverlay input[type="password"],
+#gateOverlay input[type="text"]{
   width:min(92vw,320px);
   padding:12px 14px;
   border-radius:12px;
@@ -230,13 +242,39 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
   font-size:16px;
   outline:none;
 }
+#gateOverlay .row{
+  width:min(92vw,460px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:8px auto 0;
+}
+#gateOverlay label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:rgba(255,255,255,.85);
+  font-size:14px;
+  user-select:none;
+}
+#gateOverlay input[type="checkbox"]{
+  width:18px; height:18px;
+}
+#gateOverlay .msg{
+  width:min(92vw,460px);
+  margin:10px auto 0;
+  font-size:14px;
+  min-height:1.2em;
+  color:#ffb08a;
+}
 #gateOverlay button{
   padding:12px 14px;
   border-radius:12px;
   border:1px solid rgba(255,255,255,.18);
   background:#fff;
   color:#000;
-  font-weight:800;
+  font-weight:900;
   cursor:pointer;
 }
 #gateOverlay button.secondary{
@@ -252,11 +290,27 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
 <div id="gateOverlay" aria-modal="true" role="dialog">
   <div class="gateBox" id="gateBox">
     <img src="logo.png" alt="Shaolin Hurricanes Logo" onerror="this.style.display='none'">
+
+    <div class="gateTitle">Team Playbook Access</div>
+    <div class="gateHint">Enter the password to continue. Cancel or too many wrong attempts will lock to logo-only.</div>
+
     <div class="gateForm" id="gateForm">
-      <input id="gatePass" type="password" inputmode="text" autocomplete="off" placeholder="Team password">
+      <input id="gatePass" type="password" autocomplete="off" placeholder="Team password" aria-label="Team password">
       <button id="gateEnter" type="button">Enter</button>
       <button id="gateCancel" type="button" class="secondary">Cancel</button>
     </div>
+
+    <div class="row" id="gateRow">
+      <label for="gateShow">
+        <input id="gateShow" type="checkbox">
+        Show password
+      </label>
+      <div style="color:rgba(255,255,255,.65);font-size:14px;">
+        Attempts: <span id="gateAttempts">0</span>/<span id="gateMax">3</span>
+      </div>
+    </div>
+
+    <div class="msg" id="gateMsg" aria-live="polite"></div>
   </div>
 </div>
 <!-- /HARD GATE OVERLAY -->
