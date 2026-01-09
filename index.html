@@ -1,60 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<!-- 🔒 HARD GATE (no storage, blocks render, logo-only deny page) -->
-<style>html{visibility:hidden}</style>
-<script>
-(function () {
-  const PASSWORD = "SHAOLIN2026"; // <-- CHANGE THIS
-  const MAX_TRIES = 3;
-
-  // ✅ Set your logo file path here (same logo you use on the page)
-  const LOGO_SRC = "logo.png";
-
-  function showDeny() {
-    // Replace EVERYTHING with a logo-only page (no links/buttons/text)
-    document.open();
-    document.write(`<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Access Denied</title>
-  <style>
-    html,body{height:100%;margin:0;background:#000;}
-    .wrap{height:100%;display:flex;align-items:center;justify-content:center;}
-    img{max-width:min(92vw,700px);max-height:92vh;display:block;}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <img src="${LOGO_SRC}" alt="Shaolin Hurricanes"/>
-  </div>
-</body>
-</html>`);
-    document.close();
-    // Ensure deny page is visible
-    document.documentElement.style.visibility = "visible";
-    throw new Error("Access denied");
-  }
-
-  // Prompt up to MAX_TRIES times
-  for (let i = 0; i < MAX_TRIES; i++) {
-    const input = prompt("Enter Team Playbook Password:");
-    if (input === null) return showDeny();           // Cancel = deny
-    if (input.trim() === PASSWORD) {                 // Correct = allow
-      document.documentElement.style.visibility = "visible";
-      return;
-    }
-    // wrong password; loop continues
-  }
-
-  return showDeny();
-})();
-</script>
-<!-- /HARD GATE -->
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shaolin Hurricanes Offensive Playbook System</title>
@@ -246,9 +192,75 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
   gap:10px;
   flex-wrap:wrap;
 }
+
+/* === HARD GATE OVERLAY (REAL BLOCK) === */
+#gateOverlay{
+  position:fixed; inset:0;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999999;
+}
+#gateOverlay .gateBox{
+  width:min(92vw,520px);
+  text-align:center;
+  padding:18px;
+}
+#gateOverlay img{
+  max-width:min(92vw,700px);
+  max-height:70vh;
+  display:block;
+  margin:0 auto;
+}
+#gateOverlay .gateForm{
+  margin-top:16px;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+#gateOverlay input{
+  width:min(92vw,320px);
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  font-size:16px;
+  outline:none;
+}
+#gateOverlay button{
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.18);
+  background:#fff;
+  color:#000;
+  font-weight:800;
+  cursor:pointer;
+}
+#gateOverlay button.secondary{
+  background:rgba(255,255,255,.06);
+  color:#fff;
+}
 </style>
 </head>
+
 <body>
+
+<!-- 🔒 HARD GATE OVERLAY (NO STORAGE, LOGO-ONLY DENY) -->
+<div id="gateOverlay" aria-modal="true" role="dialog">
+  <div class="gateBox" id="gateBox">
+    <img src="logo.png" alt="Shaolin Hurricanes Logo" onerror="this.style.display='none'">
+    <div class="gateForm" id="gateForm">
+      <input id="gatePass" type="password" inputmode="text" autocomplete="off" placeholder="Team password">
+      <button id="gateEnter" type="button">Enter</button>
+      <button id="gateCancel" type="button" class="secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- /HARD GATE OVERLAY -->
+
 <div class="wrap">
 
 <header>
@@ -266,15 +278,12 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
 
   <h1>Shaolin Hurricanes<br>Offensive Playbook System</h1>
 
-  <p> INTERACTIVE PLAYBOOK IS BEING UPDATED. USE PDF LINKS. </p>
+  <p>INTERACTIVE PLAYBOOK IS BEING UPDATED. USE PDF LINKS.</p>
   <p>Tap a playbook to open the PDF in a new tab, or use Preview to view it inline.</p>
 
   <div class="heroactions" role="group" aria-label="Playbook actions">
     <a class="btn" href="playbook.html">Open Interactive Playbook</a>
     <button class="btn secondary" type="button" id="togglePdfs" aria-controls="pdfGrid" aria-expanded="true">Hide PDFs</button>
-
-    <!-- ✅ Added: Reset Access -->
-    <button class="btn secondary" type="button" id="resetAccessBtn">Reset Access</button>
   </div>
 </section>
 
@@ -347,19 +356,6 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
 
 <script>
 (() => {
-  const STORAGE_KEY = "shaolin_playbook_access_granted_v2";
-
-  // ✅ Reset Access button
-  const resetBtn = document.getElementById('resetAccessBtn');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      localStorage.removeItem(STORAGE_KEY);
-      alert("Saved access cleared on this device. Reloading…");
-      location.reload();
-    });
-  }
-
-  // Your existing preview logic
   const cards = Array.from(document.querySelectorAll('.card'));
 
   function closeCard(card) {
@@ -401,7 +397,7 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
     }
   });
 
-  // Optional: PDF show/hide button (if you want it to actually work)
+  // PDF show/hide toggle
   const toggle = document.getElementById('togglePdfs');
   const grid = document.getElementById('pdfGrid');
   if (toggle && grid) {
@@ -420,5 +416,66 @@ a:focus, button:focus{outline:2px solid rgba(255,107,53,.6); outline-offset:2px}
   }
 })();
 </script>
+
+<!-- 🔒 Gate logic (REAL BLOCK, NO STORAGE, LOGO-ONLY DENY) -->
+<script>
+(() => {
+  const PASSWORD = "SHAOLIN2026"; // <-- CHANGE THIS
+  const MAX_TRIES = 3;
+
+  const overlay = document.getElementById("gateOverlay");
+  const form = document.getElementById("gateForm");
+  const input = document.getElementById("gatePass");
+  const enter = document.getElementById("gateEnter");
+  const cancel = document.getElementById("gateCancel");
+
+  let tries = 0;
+
+  // Block scroll behind overlay
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+
+  function denyLogoOnly() {
+    // Remove form so ONLY logo remains
+    if (form) form.remove();
+
+    // Keep overlay forever (blocks everything underneath)
+    overlay.style.display = "flex";
+    overlay.style.pointerEvents = "auto";
+    overlay.style.userSelect = "none";
+  }
+
+  function allowAccess() {
+    overlay.remove();
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+  }
+
+  function check() {
+    const val = (input.value || "").trim();
+    if (val === PASSWORD) return allowAccess();
+
+    tries++;
+    input.value = "";
+    input.focus();
+
+    if (tries >= MAX_TRIES) return denyLogoOnly();
+    // silent fail (no alerts) keeps deny page clean
+  }
+
+  enter.addEventListener("click", check);
+  cancel.addEventListener("click", denyLogoOnly);
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") check();
+    if (e.key === "Escape") denyLogoOnly();
+  });
+
+  // Autofocus
+  setTimeout(() => input.focus(), 50);
+})();
+</script>
+<!-- /Gate logic -->
+
 </body>
 </html>
